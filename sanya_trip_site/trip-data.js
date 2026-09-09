@@ -36,19 +36,30 @@ window.TRIP_DATA = {
     ]}
   ],
   hotels:[
-    {name:"三亚海棠湾万丽度假酒店",dates:"10.03 — 10.06",desc:"前三晚的度假基地。位置偏，但策略明确：白天享受 Resort，想吃东西时再打车去海棠湾餐饮区域。",chips:["海棠湾","Resort 模式","不依赖步行觅食"]},
-    {name:"三亚湾洛克铂金海景酒店",dates:"10.06 — 10.07",desc:"最后一晚切换到市区与三亚湾生活圈。下午到晚上集中吃喝，第二天直接去机场。",chips:["三亚湾","市区吃喝","去机场方便"]}
+    {name:"三亚海棠湾万丽度假酒店",dates:"10.03 — 10.06",desc:"前三晚的度假基地。位置偏，但策略明确：白天享受 Resort，想吃东西时再打车去海棠湾餐饮区域。",chips:["海棠湾","Resort 模式","不依赖步行觅食"],mapPlaceId:"ren-sanya-haitang"},
+    {name:"三亚湾洛克铂金海景酒店",dates:"10.06 — 10.07",desc:"最后一晚切换到市区与三亚湾生活圈。下午到晚上集中吃喝，第二天直接去机场。",chips:["三亚湾","市区吃喝","去机场方便"],mapPlaceId:"rock-platinum-sanya-bay"}
   ],
   zones:[
     {name:"海棠湾北段 / 万丽",desc:"酒店度假基地。核心是休息，不强求周边步行餐饮。",chips:["10/4","10/5","低强度"]},
-    {name:"海棠湾中南段",desc:"想出门时的主要吃喝活动半径。亚特兰蒂斯、海棠 68 等都只是区域级备选。",chips:["弹性出发","吃喝为主","不打卡"]},
-    {name:"三亚湾 / 市区",desc:"10/6 下午正式切换。适合把本地特色、夜市、海边散步集中在这半天解决。",chips:["10/6","夜市","市区"]}
+    {name:"海棠湾中南段",desc:"想出门时的主要吃喝活动半径。林旺夜市、海棠 68 和糟粕醋都可以按当天胃口选择。",chips:["弹性出发","海鲜","糟粕醋"]},
+    {name:"三亚湾 / 市区",desc:"10/6 下午正式切换。椰子鸡、抱罗粉、酸粉和小吃集中在这半天慢慢挑。",chips:["10/6","本地小吃","市区"]}
   ],
   places:[
-    {name:"三亚海棠湾万丽度假酒店",category:"酒店 · 10/03–10/06",note:"前三晚基地",amap:"三亚海棠湾万丽度假酒店"},
-    {name:"三亚亚特兰蒂斯",category:"备选区域",note:"可以吃饭，但不是必去",amap:"三亚亚特兰蒂斯"},
-    {name:"海棠68环球美食街",category:"备选区域",note:"适合当作海棠湾集中吃喝坐标",amap:"海棠68环球美食街"},
-    {name:"三亚湾洛克铂金海景酒店",category:"酒店 · 10/06–10/07",note:"市区阶段基地",amap:"三亚湾洛克铂金海景酒店"},
-    {name:"三亚凤凰国际机场",category:"交通",note:"10/03 抵达 · 10/07 离开",amap:"三亚凤凰国际机场"}
+    {id:"ren-sanya-haitang",name:"三亚海棠湾万丽度假酒店",type:"hotel",area:"haitang",category:"酒店 · 10/03–10/06",note:"前三晚基地",amap:"三亚海棠湾万丽度假酒店"},
+    {id:"atlantis-sanya",name:"三亚亚特兰蒂斯",type:"food",area:"haitang",category:"海棠湾 · 备选区域",note:"可以吃饭，但不是必去",amap:"三亚亚特兰蒂斯"},
+    {id:"haitang-68-food-street",name:"海棠68环球美食街",type:"food",area:"haitang",category:"海棠湾 · 美食街",note:"海棠湾集中吃喝坐标",amap:"海棠68环球美食街"},
+    {id:"laolangjia-linwang",name:"老郎家海鲜大排档",type:"food",area:"haitang",category:"海棠湾 · 林旺夜市",note:"海鲜大排档备选",amap:"三亚 老郎家海鲜大排档 林旺夜市"},
+    {id:"laopo-xiangcaoya",name:"唠婆香草鸭",type:"food",area:"haitang",category:"海棠湾 · 海棠68二楼",note:"香草鸭备选",amap:"三亚 唠婆香草鸭 海棠68环球美食街"},
+    {id:"ajun-baoluofen",name:"阿俊糟粕醋抱罗粉",type:"food",area:"haitang",category:"海棠湾 · 粉面小吃",note:"糟粕醋抱罗粉备选",amap:"三亚 阿俊糟粕醋抱罗粉"},
+    {id:"linjie-seafood",name:"林姐香味海鲜",type:"food",area:"haitang",category:"海棠湾 · 海鲜",note:"海鲜备选",amap:"三亚 林姐香味海鲜 海棠湾"},
+    {id:"qiongxiaoqiong-hotpot",name:"琼小琼糟粕醋火锅",type:"food",area:"haitang",category:"海棠湾 · 糟粕醋",note:"糟粕醋火锅备选",amap:"三亚 琼小琼糟粕醋火锅 海棠湾"},
+    {id:"rock-platinum-sanya-bay",name:"三亚湾洛克铂金海景酒店",type:"hotel",area:"sanyaBay",category:"酒店 · 10/06–10/07",note:"市区阶段基地",amap:"三亚湾洛克铂金海景酒店"},
+    {id:"diadia-coconut-chicken",name:"嗲嗲的椰子鸡",type:"food",area:"sanyaBay",category:"三亚湾 · 椰子鸡",note:"椰子鸡备选",amap:"三亚 嗲嗲的椰子鸡 三亚湾"},
+    {id:"xiangjie-baoluofen",name:"祥姐抱罗粉",type:"food",area:"sanyaBay",category:"第一市场 · 抱罗粉",note:"第一市场粉面备选",amap:"三亚 祥姐抱罗粉 第一市场"},
+    {id:"xinmajia-milan",name:"馨妈家儋州米烂",type:"food",area:"sanyaBay",category:"三亚湾 · 本地小吃",note:"儋州米烂备选",amap:"三亚 馨妈家儋州米烂"},
+    {id:"xiaogongzhu-baoji",name:"小公主包鸡烤鸡",type:"food",area:"sanyaBay",category:"三亚湾 · 烤鸡",note:"包鸡烤鸡备选",amap:"三亚 小公主包鸡烤鸡"},
+    {id:"shengji-changfen",name:"晟记普宁肠粉王",type:"food",area:"sanyaBay",category:"三亚湾 · 肠粉",note:"肠粉备选",amap:"三亚 晟记普宁肠粉王"},
+    {id:"junling-suanfen",name:"君陵陵水酸粉",type:"food",area:"sanyaBay",category:"三亚湾 · 酸粉",note:"陵水酸粉备选",amap:"三亚 君陵陵水酸粉"},
+    {id:"sanya-airport",name:"三亚凤凰国际机场",type:"transport",area:"sanyaBay",category:"交通",note:"10/03 抵达 · 10/07 离开",amap:"三亚凤凰国际机场"}
   ]
 };

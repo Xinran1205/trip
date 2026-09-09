@@ -618,12 +618,17 @@ h1 span {
   color: var(--muted);
   letter-spacing: 0.08em;
 }
-.map-filters {
+.map-filters,
+.area-filters {
   display: flex;
   gap: 6px;
-  margin: 17px 0;
+  margin: 17px 0 0;
 }
-.filter {
+.area-filters {
+  margin: 8px 0 17px;
+}
+.filter,
+.area-filter {
   border: 1px solid transparent;
   background: #f1f1e9;
   border-radius: 5px;
@@ -631,7 +636,8 @@ h1 span {
   font-size: 11px;
   min-height: 33px;
 }
-.filter.active {
+.filter.active,
+.area-filter.active {
   background: var(--green);
   color: white;
 }
@@ -666,6 +672,14 @@ h1 span {
 }
 .place-copy {
   min-width: 0;
+}
+.place-category {
+  display: block;
+  color: #9a855a;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  margin-bottom: 2px;
 }
 .place-copy strong {
   display: block;
@@ -1226,6 +1240,10 @@ footer small {
   }
   .place-copy strong {
     font-size: 11px;
+  }
+  .place-category {
+    font-size: 8px;
+    letter-spacing: 0.04em;
   }
   .place-copy small {
     font-size: 9px;

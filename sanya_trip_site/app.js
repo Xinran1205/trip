@@ -73,7 +73,7 @@
   $("#hotels").innerHTML = data.hotels
     .map(
       (hotel, index) =>
-        `<article class="hotel"><div class="hotel-banner"><strong>${index ? "Sanya Bay" : "Haitang Bay"}<small>${index ? "CITY WALKS & SUNSET" : "OCEAN AIR & SLOW MORNINGS"}</small></strong><span class="night-count">${index ? "01 NIGHT" : "03 NIGHTS"}</span></div><div class="hotel-body"><span class="hotel-date">${hotel.dates} / 2026</span><h3>${escapeHTML(hotel.name)}</h3><p>${escapeHTML(hotel.desc)}</p><div class="meta">${chips(hotel.chips)}</div><button class="hotel-link" data-hotel="${index ? 3 : 0}">在地图中查看酒店 <span>↗</span></button></div></article>`,
+        `<article class="hotel"><div class="hotel-banner"><strong>${index ? "Sanya Bay" : "Haitang Bay"}<small>${index ? "CITY WALKS & SUNSET" : "OCEAN AIR & SLOW MORNINGS"}</small></strong><span class="night-count">${index ? "01 NIGHT" : "03 NIGHTS"}</span></div><div class="hotel-body"><span class="hotel-date">${hotel.dates} / 2026</span><h3>${escapeHTML(hotel.name)}</h3><p>${escapeHTML(hotel.desc)}</p><div class="meta">${chips(hotel.chips)}</div><button class="hotel-link" data-place-id="${escapeHTML(hotel.mapPlaceId)}">在地图中查看酒店 <span>↗</span></button></div></article>`,
     )
     .join("");
   $("#zones").innerHTML = data.zones
@@ -86,13 +86,21 @@
   const places = data.places.map((place, index) => ({
     ...place,
     index,
-    type: place.category.startsWith("酒店")
-      ? "hotel"
-      : place.category === "交通"
-        ? "transport"
-        : "food",
+    type:
+      place.type ||
+      (place.category.startsWith("酒店")
+        ? "hotel"
+        : place.category === "交通"
+          ? "transport"
+          : "food"),
+    area: place.area || "all",
   }));
+  const labels = {
+    area: { all: "全部区域", haitang: "海棠湾", sanyaBay: "三亚湾" },
+    type: { all: "全部", hotel: "酒店", food: "吃喝", transport: "交通" },
+  };
   let activeFilter = "all";
+  let activeArea = "all";
   let activePlace = null;
   let map = null;
   let infoWindow = null;
@@ -104,28 +112,34 @@
   const status = (text) => {
     $("#map-status").textContent = text;
   };
+  const matchesActiveFilters = (place) =>
+    (activeFilter === "all" || place.type === activeFilter) &&
+    (activeArea === "all" || place.area === activeArea);
+  $("#place-count").textContent =
+    `${String(places.length).padStart(2, "0")} PLACES`;
   function renderPlaces() {
-    $("#places").innerHTML = places
-      .filter((place) => activeFilter === "all" || place.type === activeFilter)
+    const visiblePlaces = places.filter(matchesActiveFilters);
+    $("#places").innerHTML = visiblePlaces
       .map(
         (place) =>
-          `<article class="place${place.index === activePlace ? " active" : ""}"><button class="place-select" data-place="${place.index}" aria-pressed="${place.index === activePlace}" aria-label="在地图中查看${escapeHTML(place.name)}"><span class="place-number">${String(place.index + 1).padStart(2, "0")}</span><span class="place-copy"><strong>${escapeHTML(place.name)}</strong><small>${escapeHTML(place.note)}</small></span></button><div class="place-actions"><a class="external-link" href="${searchURL(place.amap)}" target="_blank" rel="noopener noreferrer">高德打开 ↗</a></div></article>`,
+          `<article class="place${place.index === activePlace ? " active" : ""}"><button class="place-select" data-place="${place.index}" aria-pressed="${place.index === activePlace}" aria-label="在地图中查看${escapeHTML(place.name)}"><span class="place-number">${String(place.index + 1).padStart(2, "0")}</span><span class="place-copy"><span class="place-category">${escapeHTML(place.category)}</span><strong>${escapeHTML(place.name)}</strong><small>${escapeHTML(place.note)}</small></span></button><div class="place-actions"><a class="external-link" href="${searchURL(place.amap)}" target="_blank" rel="noopener noreferrer">高德打开 ↗</a></div></article>`,
       )
       .join("");
   }
-  function updateFilter(filter) {
-    activeFilter = filter;
-    document.querySelectorAll(".filter").forEach((button) => {
-      const active = button.dataset.filter === filter;
+  function syncFilterButtons(selector, dataName, activeValue) {
+    document.querySelectorAll(selector).forEach((button) => {
+      const active = button.dataset[dataName] === activeValue;
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     });
-    renderPlaces();
+  }
+  function visibleResolvedPlaces() {
+    return resolved.filter((item) => matchesActiveFilters(item.place));
+  }
+  function focusVisibleMarkers() {
     if (!mapReady) return;
     infoWindow?.close();
-    const visible = resolved.filter(
-      (item) => activeFilter === "all" || item.place.type === activeFilter,
-    );
+    const visible = visibleResolvedPlaces();
     resolved.forEach((item) =>
       visible.includes(item) ? item.marker.show() : item.marker.hide(),
     );
@@ -137,8 +151,24 @@
         14,
       );
     status(
-      `已显示 ${visible.length} 个${filter === "all" ? "收藏" : { hotel: "酒店", food: "吃喝", transport: "交通" }[filter]}地点`,
+      `已显示 ${visible.length} 个${labels.area[activeArea]} · ${labels.type[activeFilter]}地点`,
     );
+  }
+  function updateFilter(filter) {
+    activeFilter = filter;
+    syncFilterButtons(".filter", "filter", filter);
+    renderPlaces();
+    focusVisibleMarkers();
+  }
+  function updateArea(area) {
+    activeArea = area;
+    syncFilterButtons(".area-filter", "area", area);
+    renderPlaces();
+    focusVisibleMarkers();
+  }
+  function selectPlaceById(id, scroll = false) {
+    const place = places.find((entry) => entry.id === id);
+    if (place) selectPlace(place.index, scroll);
   }
   function selectPlace(index, scroll = false) {
     activePlace = index;
@@ -177,16 +207,25 @@
       updateFilter(button.dataset.filter);
     }
   });
+  $(".area-filters").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-area]");
+    if (button) {
+      activePlace = null;
+      updateArea(button.dataset.area);
+    }
+  });
   $("#hotels").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-hotel]");
+    const button = event.target.closest("[data-place-id]");
     if (button) {
       updateFilter("all");
-      selectPlace(Number(button.dataset.hotel), true);
+      updateArea("all");
+      selectPlaceById(button.dataset.placeId, true);
     }
   });
   $("#map-reset").addEventListener("click", () => {
     activePlace = null;
     updateFilter("all");
+    updateArea("all");
   });
 
   function loadSDK() {
