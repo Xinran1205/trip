@@ -136,20 +136,28 @@
               </div>
               <div class="map-filters" role="group" aria-label="地点分类">
                 <button
+                  type="button"
                   class="filter active"
                   data-filter="all"
                   aria-pressed="true"
                 >
                   全部</button
                 ><button
+                  type="button"
                   class="filter"
                   data-filter="hotel"
                   aria-pressed="false"
                 >
                   酒店</button
-                ><button class="filter" data-filter="food" aria-pressed="false">
+                ><button
+                  type="button"
+                  class="filter"
+                  data-filter="food"
+                  aria-pressed="false"
+                >
                   吃喝</button
                 ><button
+                  type="button"
                   class="filter"
                   data-filter="transport"
                   aria-pressed="false"
@@ -157,26 +165,32 @@
                   交通
                 </button>
               </div>
-              <div class="area-filters" role="group" aria-label="地点区域">
-                <button
-                  class="area-filter active"
-                  data-area="all"
-                  aria-pressed="true"
-                >
-                  全区域</button
-                ><button
-                  class="area-filter"
-                  data-area="haitang"
-                  aria-pressed="false"
-                >
-                  海棠湾</button
-                ><button
-                  class="area-filter"
-                  data-area="sanyaBay"
-                  aria-pressed="false"
-                >
-                  三亚湾
-                </button>
+              <div class="area-filter-row">
+                <span>区域</span>
+                <div class="area-filters" role="group" aria-label="地点区域">
+                  <button
+                    type="button"
+                    class="area-filter active"
+                    data-area="all"
+                    aria-pressed="true"
+                  >
+                    全部</button
+                  ><button
+                    type="button"
+                    class="area-filter"
+                    data-area="haitang"
+                    aria-pressed="false"
+                  >
+                    海棠湾</button
+                  ><button
+                    type="button"
+                    class="area-filter"
+                    data-area="sanyaBay"
+                    aria-pressed="false"
+                  >
+                    三亚湾
+                  </button>
+                </div>
               </div>
               <div id="places" class="places"></div>
               <p class="places-footnote">酒店、机场和想吃的店，都先放进地图。</p>
