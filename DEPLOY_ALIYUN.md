@@ -18,18 +18,25 @@ GitHub
 
 Docker 只有在以后要统一管理多个服务、接入后端、数据库或 CI 镜像流水线时才值得引入。
 
-## 本地配置和预览
+## 本地配置、预览和测试
 
-进入项目目录：
+进入项目目录并安装本地工具依赖：
 
 ```powershell
-cd D:\trip\sanya_trip_site
+cd D:\trip
+npm install
 ```
 
-启动一个本地静态服务器：
+生成 PWA 图标和离线版本号：
 
 ```powershell
-python -m http.server 4173 --bind 127.0.0.1
+npm run prepare:assets
+```
+
+启动本地静态预览：
+
+```powershell
+npm run preview
 ```
 
 浏览器访问：
@@ -39,6 +46,15 @@ http://127.0.0.1:4173
 ```
 
 不要直接双击打开 `index.html` 作为最终验证方式。地图 SDK、相对路径和浏览器安全策略在 HTTP/HTTPS 下更接近真实部署环境。
+
+提交前建议跑：
+
+```powershell
+npm test
+npm run test:browser
+```
+
+这些 Node 依赖只用于本地开发和测试，服务器部署不需要安装 Node。
 
 ## 提交到 GitHub
 
@@ -134,14 +150,30 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    location / {
-        try_files $uri $uri/ /index.html;
+    location = /service-worker.js {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Service-Worker-Allowed "/";
+        try_files $uri =404;
     }
 
-    location ~* \.(?:css|js|jpg|jpeg|png|webp|gif|ico|svg)$ {
+    location = /manifest.json {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
+    location ~* \.(?:html|css|js|json)$ {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
+    location ~* \.(?:jpg|jpeg|png|webp|gif|ico|svg)$ {
         expires 7d;
         add_header Cache-Control "public, max-age=604800";
         try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
     }
 }
 EOF
@@ -182,6 +214,63 @@ server {
 
 ```text
 http://你的服务器公网IP:8300/
+```
+
+注意：`http://公网IP:8300/` 可以打开静态页面，但浏览器不会允许真实定位，也不能完整安装 PWA。`navigator.geolocation` 和 Service Worker/PWA 需要 HTTPS 安全上下文。正式使用建议：
+
+- 首页继续留给别的项目：`http://IP/` 不动
+- 旅行页绑定独立域名：`https://trip.your-domain.com/`
+- Nginx 用 `443 ssl` 托管同一个 `sanya_trip_site` 目录
+
+有域名后可以用宝塔面板或 Certbot 申请免费证书。HTTPS 版本示例：
+
+```nginx
+server {
+    listen 80;
+    server_name trip.your-domain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name trip.your-domain.com;
+
+    ssl_certificate /www/server/panel/vhost/cert/trip.your-domain.com/fullchain.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/trip.your-domain.com/privkey.pem;
+
+    root /opt/apps/sanya-trip/repo/sanya_trip_site;
+    index index.html;
+
+    add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    location = /service-worker.js {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Service-Worker-Allowed "/";
+        try_files $uri =404;
+    }
+
+    location = /manifest.json {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
+    location ~* \.(?:html|css|js|json)$ {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
+    location ~* \.(?:jpg|jpeg|png|webp|gif|ico|svg)$ {
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
 ```
 
 ## 后续更新

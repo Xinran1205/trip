@@ -4,4 +4,19 @@
 
 部署到阿里云 ECS 时不需要 Docker：这是纯 HTML/CSS/JavaScript 静态项目，没有后端、数据库或构建步骤，直接用 Nginx 托管 `sanya_trip_site` 目录即可。
 
+本地开发：
+
+```powershell
+npm install
+npm run prepare:assets
+npm run preview
+```
+
+提交前检查：
+
+```powershell
+npm test
+npm run test:browser
+```
+
 详细部署步骤见 [DEPLOY_ALIYUN.md](./DEPLOY_ALIYUN.md)。

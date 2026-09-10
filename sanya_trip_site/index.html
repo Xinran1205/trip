@@ -8,6 +8,11 @@
     />
     <meta name="robots" content="noindex,nofollow,noarchive" />
     <meta name="theme-color" content="#f7f6f0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="三亚手记" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./assets/icons/icon-180.png" />
     <meta
       name="description"
       content="三亚五日度假手记：住进海风里，慢慢吃，慢慢逛，用一张地图收藏旅途。"
@@ -20,7 +25,12 @@
     <link rel="preload" href="./assets/coast.jpg" as="image" />
     <link rel="stylesheet" href="./styles.css" />
     <script defer src="./trip-data.js"></script>
+    <script defer src="./vendor/coordtransform.js"></script>
+    <script defer src="./vendor/icons.js"></script>
+    <script defer src="./trip-core.js"></script>
     <script defer src="./app.js"></script>
+    <script defer src="./travel-map.js"></script>
+    <script defer src="./pwa.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#itinerary">跳到行程内容</a>
@@ -67,6 +77,26 @@
         <div class="hero-side">THE ART OF DOING NOTHING</div>
       </section>
       <div class="container">
+        <section class="travel-availability" aria-label="旅程离线状态">
+          <div class="availability-top">
+            <div class="availability-copy" role="status">
+              <span id="connection-dot" class="connection-dot"></span>
+              <strong id="connection-label">旅程随身带</strong>
+              <span id="cache-status">正在检查离线副本</span>
+            </div>
+            <div class="availability-actions">
+              <button type="button" id="pwa-update" class="utility-button" hidden><i data-icon="RefreshCw"></i>更新旅程</button>
+              <button type="button" id="pwa-retry" class="utility-button" hidden><i data-icon="Download"></i>重试离线保存</button>
+              <button type="button" id="pwa-install" class="utility-button"><i data-icon="Download"></i>添加到主屏幕</button>
+            </div>
+          </div>
+          <div id="offline-details" class="offline-details" hidden>
+            <span><i data-icon="Check"></i>行程</span><span><i data-icon="Check"></i>酒店信息</span>
+            <span><i data-icon="Check"></i>收藏地点</span><span><i data-icon="Check"></i>已完成状态</span>
+            <span class="offline-map"><i data-icon="WifiOff"></i>地图暂不可用</span>
+          </div>
+          <p id="storage-warning" class="storage-warning" role="status" hidden>浏览器未能保存数据；本次更改仅在当前页面有效。</p>
+        </section>
         <section class="overview" aria-label="旅行概览">
           <div>
             <span class="kicker">LESS PLANS, MORE OCEAN</span>
@@ -127,6 +157,17 @@
             <p>
               酒店、吃喝与机场，一张地图就够。<br />选择地点，在高德地图中查看位置。
             </p>
+          </div>
+          <div class="location-strip">
+            <div class="location-summary">
+              <span class="location-symbol"><i data-icon="LocateFixed"></i></span>
+              <div><strong id="location-title">此刻，你在哪里</strong><p id="location-detail" role="status">尚未获取位置</p></div>
+            </div>
+            <div class="location-actions">
+              <button id="locate-me" type="button" class="utility-button primary"><i data-icon="LocateFixed"></i><span>获取当前位置</span></button>
+              <button id="clear-location" type="button" class="icon-button" title="清除当前位置" aria-label="清除当前位置" hidden><i data-icon="X"></i></button>
+            </div>
+            <button id="nearest-place" type="button" class="nearest-place" hidden></button>
           </div>
           <div class="map-layout">
             <aside class="place-panel">
@@ -192,22 +233,26 @@
                   </button>
                 </div>
               </div>
-              <div id="places" class="places"></div>
-              <p class="places-footnote">酒店、机场和想吃的店，都先放进地图。</p>
+              <div class="collection-options">
+                <label><input id="favorites-only" type="checkbox" />只看收藏</label>
+                <label class="sort-label" for="place-sort">排序<select id="place-sort"><option value="original">行程顺序</option><option value="distance" disabled>距离由近到远</option></select></label>
+              </div>
+              <div id="places" class="places" tabindex="0" aria-label="地点列表"></div>
+              <p class="places-footnote">距离为直线距离，不代表步行或行车里程。</p>
             </aside>
             <div class="map-stage">
               <div id="amap" aria-label="三亚旅行高德地图"></div>
               <div class="map-toolbar">
                 <span><i></i> SANYA · 高德地图</span
-                ><button id="map-reset" type="button" disabled>
-                  查看全部 ↗
+                ><button id="map-reset" type="button" title="查看全部地点">
+                  <i data-icon="Expand"></i>查看全部
                 </button>
               </div>
               <div id="map-loading" class="map-loading">
                 <span class="map-loader" aria-hidden="true"></span
                 ><strong>正在展开三亚地图</strong>
                 <p>让海风带路，稍等片刻。</p>
-                <button id="map-retry" class="button" hidden>重新加载</button>
+                <button id="map-retry" type="button" class="button" hidden>重新加载</button>
               </div>
               <div
                 id="map-status"
@@ -271,5 +316,10 @@
         请启用 JavaScript 查看每日行程与互动地图。
       </p></noscript
     >
+    <div id="toast" class="toast" role="status" hidden></div>
+    <dialog id="trip-dialog" class="trip-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-heading"><h2 id="dialog-title"></h2><button type="button" id="dialog-close" class="icon-button" aria-label="关闭" title="关闭"><i data-icon="X"></i></button></div>
+      <div id="dialog-content"></div>
+    </dialog>
   </body>
 </html>
